@@ -1,48 +1,64 @@
 package com.example.projbe.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.example.projbe.entity.Dishes;
-import com.example.projbe.service.DishesService;
+import com.example.projbe.repository.DishesRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/dishes")
 public class DishesController {
+
     @Autowired
-    private DishesService dishesService;
-
-    @GetMapping
-    public List<Dishes> getAllDishes() {
-        return dishesService.getAllDishes();
-    }
-
-    @GetMapping("/{id}")
-    public Dishes getDishById(@PathVariable Long id) {
-        return dishesService.getDishById(id);
-    }
+    private DishesRepository dishesRepository;
 
     @PostMapping
     public Dishes createDish(@RequestBody Dishes dish) {
-        return dishesService.createDish(dish);
+        return dishesRepository.save(dish);
+    }
+
+    @GetMapping
+    public List<Dishes> getAllDishes() {
+        return dishesRepository.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Dishes> getDishById(@PathVariable Long id) {
+        Optional<Dishes> dish = dishesRepository.findById(id);
+        if (dish.isPresent()) {
+            return ResponseEntity.ok(dish.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PutMapping("/{id}")
-    public Dishes updateDish(@PathVariable Long id, @RequestBody Dishes dishDetails) {
-        return dishesService.updateDish(id, dishDetails);
+    public ResponseEntity<Dishes> updateDish(@PathVariable Long id, @RequestBody Dishes dishDetails) {
+        Optional<Dishes> dish = dishesRepository.findById(id);
+        if (dish.isPresent()) {
+            Dishes updatedDish = dish.get();
+            updatedDish.setName(dishDetails.getName());
+            updatedDish.setPrice(dishDetails.getPrice());
+            updatedDish.setDescription(dishDetails.getDescription());
+            dishesRepository.save(updatedDish);
+            return ResponseEntity.ok(updatedDish);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteDish(@PathVariable Long id) {
-        dishesService.deleteDish(id);
+    public ResponseEntity<Void> deleteDish(@PathVariable Long id) {
+        Optional<Dishes> dish = dishesRepository.findById(id);
+        if (dish.isPresent()) {
+            dishesRepository.delete(dish.get());
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

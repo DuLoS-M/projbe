@@ -37,7 +37,8 @@ public class DishIngredientsController {
     }
 
     @PutMapping("/{id}")
-    public DishIngredients updateDishIngredient(@PathVariable Long id, @RequestBody DishIngredients dishIngredientDetails) {
+    public DishIngredients updateDishIngredient(@PathVariable Long id,
+            @RequestBody DishIngredients dishIngredientDetails) {
         return dishIngredientsService.updateDishIngredient(id, dishIngredientDetails);
     }
 

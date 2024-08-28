@@ -1,5 +1,6 @@
 package com.example.projbe.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -9,8 +10,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
+@Table(name = "dishes")
 public class Dishes {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,10 +29,10 @@ public class Dishes {
     private String description;
 
     @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderDetails> orderDetails;
+    private List<OrderDetails> orderDetails = new ArrayList<>();
 
     @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DishIngredients> dishIngredients;
+    private List<DishIngredients> dishIngredients = new ArrayList<>();
 
     // Getters and Setters
 
@@ -78,6 +81,31 @@ public class Dishes {
     }
 
     public void setDishIngredients(List<DishIngredients> dishIngredients) {
-        this.dishIngredients = dishIngredients;
+        this.dishIngredients.clear();
+        if (dishIngredients != null) {
+            this.dishIngredients.addAll(dishIngredients);
+        }
+    }
+
+    // Helper methods to manage the relationship
+
+    public void addOrderDetail(OrderDetails orderDetail) {
+        orderDetails.add(orderDetail);
+        orderDetail.setDish(this);
+    }
+
+    public void removeOrderDetail(OrderDetails orderDetail) {
+        orderDetails.remove(orderDetail);
+        orderDetail.setDish(null);
+    }
+
+    public void addDishIngredient(DishIngredients dishIngredient) {
+        dishIngredients.add(dishIngredient);
+        dishIngredient.setDish(this);
+    }
+
+    public void removeDishIngredient(DishIngredients dishIngredient) {
+        dishIngredients.remove(dishIngredient);
+        dishIngredient.setDish(null);
     }
 }
