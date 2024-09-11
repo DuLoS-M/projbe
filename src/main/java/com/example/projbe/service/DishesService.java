@@ -1,12 +1,13 @@
 package com.example.projbe.service;
 
-import com.example.projbe.entity.Dishes;
-import com.example.projbe.repository.DishesRepository;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import com.example.projbe.entity.Dishes;
+import com.example.projbe.repository.DishesRepository;
 
 @Service
 public class DishesService {
@@ -31,7 +32,7 @@ public class DishesService {
             dish.setPrice(dishDetails.getPrice());
             dish.setDescription(dishDetails.getDescription());
             dish.setDishIngredients(dishDetails.getDishIngredients());
-            dish.setOrderDetails(dishDetails.getOrderDetails());
+            // dish.setOrderDetails(dishDetails.getOrderDetails());
             return dishesRepository.save(dish);
         } else {
             return null;

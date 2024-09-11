@@ -29,9 +29,6 @@ public class Dishes {
     private String description;
 
     @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderDetails> orderDetails = new ArrayList<>();
-
-    @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DishIngredients> dishIngredients = new ArrayList<>();
 
     // Getters and Setters
@@ -68,14 +65,6 @@ public class Dishes {
         this.description = description;
     }
 
-    public List<OrderDetails> getOrderDetails() {
-        return orderDetails;
-    }
-
-    public void setOrderDetails(List<OrderDetails> orderDetails) {
-        this.orderDetails = orderDetails;
-    }
-
     public List<DishIngredients> getDishIngredients() {
         return dishIngredients;
     }
@@ -88,16 +77,6 @@ public class Dishes {
     }
 
     // Helper methods to manage the relationship
-
-    public void addOrderDetail(OrderDetails orderDetail) {
-        orderDetails.add(orderDetail);
-        orderDetail.setDish(this);
-    }
-
-    public void removeOrderDetail(OrderDetails orderDetail) {
-        orderDetails.remove(orderDetail);
-        orderDetail.setDish(null);
-    }
 
     public void addDishIngredient(DishIngredients dishIngredient) {
         dishIngredients.add(dishIngredient);
