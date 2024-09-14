@@ -3,6 +3,10 @@ package com.example.projbe.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.example.projbe.repository.DishIngredientsRepository;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,6 +19,9 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "dishes")
 public class Dishes {
+    @Autowired
+    private DishIngredientsRepository dishIngredientsRepository;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,6 +34,9 @@ public class Dishes {
 
     @Column(nullable = false)
     private String description;
+
+    @Column(name = "photo_url")
+    private String photoUrl;
 
     @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DishIngredients> dishIngredients = new ArrayList<>();
@@ -69,6 +79,15 @@ public class Dishes {
         return dishIngredients;
     }
 
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+
     public void setDishIngredients(List<DishIngredients> dishIngredients) {
         this.dishIngredients.clear();
         if (dishIngredients != null) {
@@ -78,13 +97,20 @@ public class Dishes {
 
     // Helper methods to manage the relationship
 
-    public void addDishIngredient(DishIngredients dishIngredient) {
-        dishIngredients.add(dishIngredient);
+    public void addDishIngredient(Ingredients ingredient, Double quantity) {
+        DishIngredients dishIngredient = new DishIngredients();
+        dishIngredient.setIngredient(ingredient);
         dishIngredient.setDish(this);
+        dishIngredient.setQuantityRequired(quantity);
+        dishIngredientsRepository.save(dishIngredient);
     }
 
+    // public void addDishIngredient(DishIngredients dishIngredient) {
+    //     dishIngredients.add(dishIngredient);
+    //     dishIngredient.setDish(this);
+    // }
+
     public void removeDishIngredient(DishIngredients dishIngredient) {
-        dishIngredients.remove(dishIngredient);
-        dishIngredient.setDish(null);
+        dishIngredientsRepository.delete(dishIngredient);
     }
 }
