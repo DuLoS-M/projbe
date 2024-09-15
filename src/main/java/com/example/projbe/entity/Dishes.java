@@ -3,10 +3,6 @@ package com.example.projbe.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.example.projbe.repository.DishIngredientsRepository;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,8 +15,6 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "dishes")
 public class Dishes {
-    @Autowired
-    private DishIngredientsRepository dishIngredientsRepository;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -87,7 +81,6 @@ public class Dishes {
         return photoUrl;
     }
 
-
     public void setDishIngredients(List<DishIngredients> dishIngredients) {
         this.dishIngredients.clear();
         if (dishIngredients != null) {
@@ -97,20 +90,13 @@ public class Dishes {
 
     // Helper methods to manage the relationship
 
-    public void addDishIngredient(Ingredients ingredient, Double quantity) {
-        DishIngredients dishIngredient = new DishIngredients();
-        dishIngredient.setIngredient(ingredient);
+    public void addDishIngredient(DishIngredients dishIngredient) {
+        dishIngredients.add(dishIngredient);
         dishIngredient.setDish(this);
-        dishIngredient.setQuantityRequired(quantity);
-        dishIngredientsRepository.save(dishIngredient);
     }
 
-    // public void addDishIngredient(DishIngredients dishIngredient) {
-    //     dishIngredients.add(dishIngredient);
-    //     dishIngredient.setDish(this);
-    // }
-
     public void removeDishIngredient(DishIngredients dishIngredient) {
-        dishIngredientsRepository.delete(dishIngredient);
+        dishIngredients.remove(dishIngredient);
+        dishIngredient.setDish(null);
     }
 }

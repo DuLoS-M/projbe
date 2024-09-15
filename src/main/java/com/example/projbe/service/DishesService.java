@@ -1,13 +1,22 @@
 package com.example.projbe.service;
 
+import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.example.projbe.entity.DishIngredients;
 import com.example.projbe.entity.Dishes;
+import com.example.projbe.entity.Ingredients;
+import com.example.projbe.repository.DishIngredientsRepository;
 import com.example.projbe.repository.DishesRepository;
+import com.example.projbe.repository.IngredientsRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class DishesService {
@@ -15,40 +24,49 @@ public class DishesService {
     @Autowired
     private DishesRepository dishesRepository;
 
-    public Dishes createDish(Dishes dish) {
-        return dishesRepository.save(dish);
-    }
+    @Autowired
+    private DishIngredientsRepository dishIngredientsRepository;
 
-    public Dishes getDish(Long id) {
-        Optional<Dishes> dish = dishesRepository.findById(id);
-        return dish.orElse(null);
-    }
+    @Autowired
+    private IngredientsRepository ingredientsRepository;
 
-    public Dishes updateDish(Long id, Dishes dishDetails) {
-        Optional<Dishes> optionalDish = dishesRepository.findById(id);
-        if (optionalDish.isPresent()) {
-            Dishes dish = optionalDish.get();
-            dish.setName(dishDetails.getName());
-            dish.setPrice(dishDetails.getPrice());
-            dish.setDescription(dishDetails.getDescription());
-            dish.setDishIngredients(dishDetails.getDishIngredients());
-            // dish.setOrderDetails(dishDetails.getOrderDetails());
-            return dishesRepository.save(dish);
-        } else {
-            return null;
+    @Autowired
+    private FileStorageService fileStorageService;
+
+    @Transactional
+    public Dishes createDish(String name, Double price, String description, MultipartFile photoUrl, String ingredientsJson) throws IOException {
+        System.out.println("\n\n\n");
+        System.out.println("Creating dish: " + name);
+        Dishes dish = new Dishes();
+        dish.setName(name);
+        dish.setPrice(price);
+        dish.setDescription(description);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Map<String, Object>> ingredientsList = objectMapper.readValue(ingredientsJson, new TypeReference<List<Map<String, Object>>>() {});
+        System.out.println("Ingredients: " + ingredientsList);
+
+        for (Map<String, Object> ingredientMap : ingredientsList) {
+            int ingredientId = (Integer) ingredientMap.get("id");
+            Ingredients ingredientEntity = ingredientsRepository.findById((long) ingredientId).orElse(null);
+            Number quantityNumber = (Number) ingredientMap.get("quantity");
+            Double quantity = quantityNumber.doubleValue();
+            DishIngredients dishIngredient = new DishIngredients();
+            dishIngredient.setIngredient(ingredientEntity);
+            dishIngredient.setDish(dish);
+            dishIngredient.setQuantityRequired(quantity);
+            dish.addDishIngredient(dishIngredient);
         }
-    }
 
-    public boolean deleteDish(Long id) {
-        if (dishesRepository.existsById(id)) {
-            dishesRepository.deleteById(id);
-            return true;
-        } else {
-            return false;
+        System.out.println("photoUrl: " + photoUrl);
+        if (photoUrl != null && !photoUrl.isEmpty()) {
+            System.out.println("Uploading photo");
+            String fileName = fileStorageService.storeFile(photoUrl);
+            dish.setPhotoUrl("http://localhost:8080/uploads/" + fileName);
         }
-    }
 
-    public List<Dishes> getAllDishes() {
-        return dishesRepository.findAll();
+        dishesRepository.save(dish);
+        System.out.println("\n\n\n");
+        return dish;
     }
 }
