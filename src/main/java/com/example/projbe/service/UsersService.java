@@ -1,11 +1,12 @@
 package com.example.projbe.service;
 
-import com.example.projbe.entity.Users;
-import com.example.projbe.repository.UsersRepository;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.example.projbe.entity.Users;
+import com.example.projbe.repository.UsersRepository;
 
 @Service
 public class UsersService {
@@ -37,8 +38,21 @@ public class UsersService {
         }
         return null;
     }
+    
 
     public void deleteUser(Long id) {
         usersRepository.deleteById(id);
+    }
+
+     public Users validateUser(String email, String password, String role) {
+        Users user = usersRepository.findByEmail(email);
+        System.out.println(user);
+        System.out.println(user.getRole());
+        System.out.println(role);
+        if (user != null && user.getPassword().equals(password) && user.getRole().toString().equals(role)) {
+            return user;
+        }
+        System.out.println("Invalid credentials");
+        return null;
     }
 }
