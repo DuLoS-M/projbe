@@ -1,17 +1,21 @@
 package com.example.projbe.service;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.projbe.entity.Users;
+import com.example.projbe.entity.Users.Role;
 import com.example.projbe.repository.UsersRepository;
 
 @Service
 public class UsersService {
     @Autowired
     private UsersRepository usersRepository;
+
+       private static final Logger logger = Logger.getLogger(UsersService.class.getName());
 
     public List<Users> getAllUsers() {
         return usersRepository.findAll();
@@ -44,15 +48,37 @@ public class UsersService {
         usersRepository.deleteById(id);
     }
 
-     public Users validateUser(String email, String password, String role) {
+ public Users validateUser(String email, String password, String role) {
+        Role roleEnum = Role.valueOf(role.toUpperCase());
+        logger.info("Validating user with email: " + email + ", role: " + role);
         Users user = usersRepository.findByEmail(email);
-        System.out.println(user);
-        System.out.println(user.getRole());
-        System.out.println(role);
-        if (user != null && user.getPassword().equals(password) && user.getRole().toString().equals(role)) {
+        if (user != null) {
+            logger.info("User found: " + user.getEmail());
+            logger.info("User role: " + user.getRole());
+            logger.info("Role: " + role);
+            logger.info("User password: " + user.getPassword());
+            logger.info("Role enum: " + roleEnum);
+            logger.info("Password: " + password);
+
+            if (user.getPassword().equals(password) && user.getRole().equals(roleEnum)) {
+                logger.info("User validated successfully");
+                return user;
+            } else {
+                logger.warning("Invalid password or role for user: " + email);
+            }
+        } else {
+            logger.warning("User not found with email: " + email);
+        }
+        return null;
+    }
+
+        public Users updatePassword(Long id, String password) {
+        Users user = usersRepository.findById(id).orElse(null);
+        if (user != null) {
+            user.setPassword(password);
+            usersRepository.save(user);
             return user;
         }
-        System.out.println("Invalid credentials");
         return null;
     }
 }

@@ -3,6 +3,7 @@ package com.example.projbe.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,8 +12,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.projbe.DTOs.LoginRequestDTO;
+import com.example.projbe.DTOs.PasswordUpdateDTO;
 import com.example.projbe.entity.Users;
 import com.example.projbe.service.UsersService;
 
@@ -47,13 +50,23 @@ public class UsersController {
         usersService.deleteUser(id);
     }
 
-    @PostMapping("/login")
+ @PostMapping("/login")
     public Users loginUser(@RequestBody LoginRequestDTO loginRequest) {
         Users user = usersService.validateUser(loginRequest.getEmail(), loginRequest.getPassword(), loginRequest.getRole());
         if (user != null) {
             return user;
         } else {
-            throw new RuntimeException("Invalid credentials");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid credentials");
+        }
+    }
+
+    @PutMapping("/{id}/password")
+    public Users updatePassword(@PathVariable Long id, @RequestBody PasswordUpdateDTO passwordUpdateDTO) {
+        Users user = usersService.updatePassword(id, passwordUpdateDTO.getPassword());
+        if (user != null) {
+            return user;
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
     }
     
