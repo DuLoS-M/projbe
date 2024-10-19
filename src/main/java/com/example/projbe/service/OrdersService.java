@@ -8,12 +8,15 @@ import org.springframework.stereotype.Service;
 
 import com.example.projbe.DTOs.OrderDTO;
 import com.example.projbe.DTOs.OrderDetailDTO;
+import com.example.projbe.entity.DishIngredients;
 import com.example.projbe.entity.Dishes;
+import com.example.projbe.entity.Ingredients;
 import com.example.projbe.entity.OrderDetails;
 import com.example.projbe.entity.Orders;
 import com.example.projbe.entity.Users;
 import com.example.projbe.enums.OrderStatus;
 import com.example.projbe.repository.DishesRepository;
+import com.example.projbe.repository.IngredientsRepository;
 import com.example.projbe.repository.OrdersRepository;
 import com.example.projbe.repository.UsersRepository;
 
@@ -27,6 +30,9 @@ public class OrdersService {
 
     @Autowired
     private DishesRepository dishesRepository;
+
+    @Autowired
+    private IngredientsRepository ingredientsRepository;
 
     public List<OrderDTO> getAllOrders() {
         return ordersRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
@@ -63,10 +69,28 @@ public class OrdersService {
         if (order != null) {
             order.setStatus(status);
             Orders updatedOrder = ordersRepository.save(order);
+
+            if (status == OrderStatus.COMPLETED) {
+                updateIngredientsForOrder(order);
+            }
+
             return convertToDTO(updatedOrder);
         }
         return null;
     }
+
+    private void updateIngredientsForOrder(Orders order) {
+        for (OrderDetails detail : order.getOrderDetails()) {
+            Dishes dish = detail.getDish();
+            for (DishIngredients dishIngredient : dish.getDishIngredients()) {
+                Ingredients ingredient = dishIngredient.getIngredient();
+                double quantityToDebit = dishIngredient.getQuantityRequired() * detail.getQuantity();
+                ingredient.setQuantity(ingredient.getQuantity() - quantityToDebit);
+                ingredientsRepository.save(ingredient);
+            }
+        }
+    }
+
 
     public OrderDTO updateOrder(Long id, Orders orderDetails) {
         Orders order = ordersRepository.findById(id).orElse(null);
