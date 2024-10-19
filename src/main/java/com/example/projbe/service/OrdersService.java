@@ -8,10 +8,12 @@ import org.springframework.stereotype.Service;
 
 import com.example.projbe.DTOs.OrderDTO;
 import com.example.projbe.DTOs.OrderDetailDTO;
+import com.example.projbe.entity.Dishes;
 import com.example.projbe.entity.OrderDetails;
 import com.example.projbe.entity.Orders;
-import com.example.projbe.enums.OrderStatus;
 import com.example.projbe.entity.Users;
+import com.example.projbe.enums.OrderStatus;
+import com.example.projbe.repository.DishesRepository;
 import com.example.projbe.repository.OrdersRepository;
 import com.example.projbe.repository.UsersRepository;
 
@@ -22,6 +24,9 @@ public class OrdersService {
 
     @Autowired
     private UsersRepository usersRepository;
+
+    @Autowired
+    private DishesRepository dishesRepository;
 
     public List<OrderDTO> getAllOrders() {
         return ordersRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList());
@@ -91,10 +96,12 @@ public class OrdersService {
         OrderDTO orderDTO = new OrderDTO();
         orderDTO.setId(order.getId());
         orderDTO.setCustomerName(order.getCustomerName());
-        orderDTO.setOrderDate(order.getOrderDate());
+        orderDTO.setOrderDate(java.sql.Timestamp.valueOf(order.getOrderDate()));
         orderDTO.setTotalAmount(order.getTotalAmount());
         orderDTO.setStatus(order.getStatus().name());
         orderDTO.setOrderDetails(order.getOrderDetails().stream().map(this::convertToDetailDTO).collect(Collectors.toList()));
+        orderDTO.setUserName(order.getUser().getFirstName());
+        orderDTO.setUserEmail(order.getUser().getEmail());
         return orderDTO;
     }
 
@@ -102,6 +109,7 @@ public class OrdersService {
         OrderDetailDTO orderDetailDTO = new OrderDetailDTO();
         orderDetailDTO.setId(orderDetail.getId());
         orderDetailDTO.setDishId(orderDetail.getDish().getId());
+        orderDetailDTO.setDishName(orderDetail.getDish().getName()); // Set the dish name
         orderDetailDTO.setQuantity(orderDetail.getQuantity());
         orderDetailDTO.setPrice(orderDetail.getPrice());
         return orderDetailDTO;

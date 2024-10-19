@@ -15,7 +15,7 @@ public class UsersService {
     @Autowired
     private UsersRepository usersRepository;
 
-       private static final Logger logger = Logger.getLogger(UsersService.class.getName());
+    private static final Logger logger = Logger.getLogger(UsersService.class.getName());
 
     public List<Users> getAllUsers() {
         return usersRepository.findAll();
@@ -35,20 +35,18 @@ public class UsersService {
             user.setFirstName(userDetails.getFirstName());
             user.setLastName(userDetails.getLastName());
             user.setNit(userDetails.getNit());
-            user.setEmail(userDetails.getEmail());
             user.setPassword(userDetails.getPassword());
             user.setRole(userDetails.getRole());
             return usersRepository.save(user);
         }
         return null;
     }
-    
 
     public void deleteUser(Long id) {
         usersRepository.deleteById(id);
     }
 
- public Users validateUser(String email, String password, String role) {
+    public Users validateUser(String email, String password, String role) {
         Role roleEnum = Role.valueOf(role.toUpperCase());
         logger.info("Validating user with email: " + email + ", role: " + role);
         Users user = usersRepository.findByEmail(email);
@@ -72,7 +70,7 @@ public class UsersService {
         return null;
     }
 
-        public Users updatePassword(Long id, String password) {
+    public Users updatePassword(Long id, String password) {
         Users user = usersRepository.findById(id).orElse(null);
         if (user != null) {
             user.setPassword(password);

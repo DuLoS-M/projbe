@@ -1,19 +1,19 @@
 package com.example.projbe.DTOs;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 public class OrderDTO {
     private Long id;
     private String customerName;
-    private LocalDateTime orderDate;
+    private Date orderDate;
     private Double totalAmount;
     private String status;
     private List<OrderDetailDTO> orderDetails;
-    private Integer orderNumber;
+    private String userName; // Add this field
+    private String userEmail; // Add this field
 
-    // Getters and setters
-
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -30,11 +30,11 @@ public class OrderDTO {
         this.customerName = customerName;
     }
 
-    public LocalDateTime getOrderDate() {
+    public Date getOrderDate() {
         return orderDate;
     }
 
-    public void setOrderDate(LocalDateTime orderDate) {
+    public void setOrderDate(Date orderDate) {
         this.orderDate = orderDate;
     }
 
@@ -62,11 +62,20 @@ public class OrderDTO {
         this.orderDetails = orderDetails;
     }
 
-    public Integer getOrderNumber() {
-        return orderNumber;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setOrderNumber(Integer orderNumber) {
-        this.orderNumber = orderNumber;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
+    
 }

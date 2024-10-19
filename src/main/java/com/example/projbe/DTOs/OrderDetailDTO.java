@@ -3,11 +3,11 @@ package com.example.projbe.DTOs;
 public class OrderDetailDTO {
     private Long id;
     private Long dishId;
+    private String dishName; // Add this field
     private Integer quantity;
     private Double price;
 
-    // Getters and setters
-
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -22,6 +22,14 @@ public class OrderDetailDTO {
 
     public void setDishId(Long dishId) {
         this.dishId = dishId;
+    }
+
+    public String getDishName() {
+        return dishName;
+    }
+
+    public void setDishName(String dishName) {
+        this.dishName = dishName;
     }
 
     public Integer getQuantity() {
@@ -39,6 +47,4 @@ public class OrderDetailDTO {
     public void setPrice(Double price) {
         this.price = price;
     }
-
-
 }
