@@ -21,8 +21,12 @@ public class OrdersController {
     private OrdersService ordersService;
 
     @GetMapping
-    public List<OrderDTO> getAllOrders() {
-        return ordersService.getAllOrders();
+    public List<OrderDTO> getAllOrders(@RequestParam(required = false) Long id) {
+        if (id != null) {
+            return ordersService.getOrdersByUserId(id);
+        } else {
+            return ordersService.getAllOrders();
+        }
     }
 
     @GetMapping("/{id}")
@@ -40,7 +44,7 @@ public class OrdersController {
         return ordersService.createOrder(order, userId);
     }
 
-     @PutMapping("/{id}/status")
+    @PutMapping("/{id}/status")
     public ResponseEntity<OrderDTO> updateOrderStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
         String statusStr = body.get("status");
         if (statusStr == null) {
