@@ -46,51 +46,51 @@ public class OrdersService {
     public List<OrderDTO> getOrdersByUserId(Long userId) {
         return ordersRepository.findByUserId(userId).stream().map(this::convertToDTO).collect(Collectors.toList());
     }
-
-    public OrderDTO createOrder(Orders order, Long userId) {
-        Users user = usersRepository.findById(userId).orElse(null);
-        if (user != null) {
-            order.setUser(user);
-            order.setStatus(OrderStatus.PENDING);
-            // Set the order reference in each OrderDetails
-            if (order.getOrderDetails() != null) {
-                for (OrderDetails detail : order.getOrderDetails()) {
-                    detail.setOrder(order);
-                }
-            }
-            Orders savedOrder = ordersRepository.save(order);
-            return convertToDTO(savedOrder);
-        }
-        return null;
-    }
-
-    public OrderDTO updateOrderStatus(Long id, OrderStatus status) {
-        Orders order = ordersRepository.findById(id).orElse(null);
-        if (order != null) {
-            order.setStatus(status);
-            Orders updatedOrder = ordersRepository.save(order);
-
-            if (status == OrderStatus.COMPLETED) {
-                updateIngredientsForOrder(order);
-            }
-
-            return convertToDTO(updatedOrder);
-        }
-        return null;
-    }
-
-    private void updateIngredientsForOrder(Orders order) {
-        for (OrderDetails detail : order.getOrderDetails()) {
-            Dishes dish = detail.getDish();
-            for (DishIngredients dishIngredient : dish.getDishIngredients()) {
-                Ingredients ingredient = dishIngredient.getIngredient();
-                double quantityToDebit = dishIngredient.getQuantityRequired() * detail.getQuantity();
-                ingredient.setQuantity(ingredient.getQuantity() - quantityToDebit);
-                ingredientsRepository.save(ingredient);
+public OrderDTO createOrder(Orders order, Long userId) {
+    Users user = usersRepository.findById(userId).orElse(null);
+    if (user != null) {
+        order.setUser(user);
+        order.setStatus(OrderStatus.PENDING);
+        // Set the order reference in each OrderDetails
+        if (order.getOrderDetails() != null) {
+            for (OrderDetails detail : order.getOrderDetails()) {
+                detail.setOrder(order);
             }
         }
+        Orders savedOrder = ordersRepository.save(order);
+        
+        // Update ingredients for the order
+        updateIngredientsForOrder(savedOrder);
+        
+        return convertToDTO(savedOrder);
     }
+    return null;
+}
 
+public OrderDTO updateOrderStatus(Long id, OrderStatus status) {
+    Orders order = ordersRepository.findById(id).orElse(null);
+    if (order != null) {
+        order.setStatus(status);
+        Orders updatedOrder = ordersRepository.save(order);
+        return convertToDTO(updatedOrder);
+    }
+    return null;
+}
+
+private void updateIngredientsForOrder(Orders order) {
+    for (OrderDetails detail : order.getOrderDetails()) {
+        Dishes dish = detail.getDish();
+        for (DishIngredients dishIngredient : dish.getDishIngredients()) {
+            Ingredients ingredient = dishIngredient.getIngredient();
+            double quantityToDebit = dishIngredient.getQuantityRequired() * detail.getQuantity();
+            if (ingredient.getQuantity() < quantityToDebit) {
+                throw new RuntimeException("Not enough " + ingredient.getName() + " in stock");
+            }
+            ingredient.setQuantity(ingredient.getQuantity() - quantityToDebit);
+            ingredientsRepository.save(ingredient);
+        }
+    }
+}
 
     public OrderDTO updateOrder(Long id, Orders orderDetails) {
         Orders order = ordersRepository.findById(id).orElse(null);
